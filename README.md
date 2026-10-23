@@ -37,27 +37,6 @@ This pipeline performs **de novo subtyping** of BK polyomavirus (BKPyV) VP1 caps
 
 ---
 
-## 📌 Version Report
-
-| Component | Version | Date | Status |
-|-----------|---------|------|--------|
-| **Pipeline** | `v2.0` | 2026-10-23 | ✅ Stable |
-| **Notebook** | `v2.0` | 2026-10-23 | ✅ Bug-fixed |
-| **Reference Panel** | `v3.0` | 2026-10-23 | ✅ 112 sequences |
-| **CSV Export** | `v2.0` | 2026-10-23 | ✅ 4-column format |
-| **Agent Prompt** | `v1.0` | 2026-10-23 | ✅ GLM-tuned |
-
-### 🐛 Bug History
-
-| # | Bug | Fix | Version |
-|---|-----|-----|---------|
-| 1 | `NewickIO.to_newick()` does not exist in Biopython | Replaced with `NewickIO.write([tree], buf)` + `buf.getvalue()` | v2.0 |
-| 2 | `/note="BKPyVgp4"` misinterpreted as subtype IV | Discovered `/note="BKPyVgpN"` is a gene-product index, not subtype | v2.0 |
-| 3 | VP1 nt length filter rejected 1089 bp (with stop codon) | Extended filter to accept 1086, 1089, 1092 | v2.0 |
-| 4 | Ambiguous IUPAC codes (N/M/R) inflated fingerprint counts | Added `VALID_NTS = set("ATCG")` filter | v2.0 |
-
----
-
 ## 🔄 Pipeline Steps
 
 | Step | Description | Tool |
@@ -121,13 +100,6 @@ from Bio.Seq import Seq
 
 QUERY = "GGTAGATGCTATTACAGAGGTAGAATGCTTCCTAAACCCAGAAATGGGGGATCCAGATGAAAACCTTAGG..."
 # ... rest of pipeline
-```
-
-### Option C: GLM Agent Prompt
-
-Use `agent_prompt_glm.txt` — paste it as the first message to a GLM model, then provide your sequence.
-
----
 
 ## 📁 Output Files
 
@@ -148,33 +120,6 @@ Use `agent_prompt_glm.txt` — paste it as the first message to a GLM model, the
 | 2 | `subtype` | `Ia` |
 | 3 | `unique_subtype_fingerprints_count_out_of_total` | `3/12` |
 | 4 | `accession_number` | `JF894228.1` |
-
----
-
-## 🎯 Key Findings
-
-### The 5 "Sub-lineage Switch" Positions
-
-These 5 positions in the 249-bp fragment determine the sub-lineage call:
-
-| Position | VP1 Residue | Residue Options | Effect |
-|----------|-------------|-----------------|--------|
-| **12** | 45 | T → Ia-specific | Rules out Ib1/Ib2/Ic |
-| **123** | 82 | G → Ia-G-form | A → Ib1/Ib2 form |
-| **165** | 96 | G → Ia-G-form ONLY | C → Ia-C-form or Ib1/Ib2/Ic |
-| **222** | 115 | A → A-form Ib2 ONLY | T → Ia/Ib1/Ic |
-| **237** | 120 | C → Ib1/Ib2 form | T → Ia/Ic form |
-
-### Call Decision Matrix
-
-| Position 123 | Position 165 | Position 222 | Position 237 | nt-level Best | Call | Confidence |
-|---|---|---|---|---|---|---|
-| G | G | T | T | Ia 100% | **Ia** | **HIGH** |
-| A | C | T | T | Ia 92/93 | mosaic | MODERATE |
-| A | C | T | C | Ib1=Ib2 92/93 | E-form Ib1 | MODERATE |
-| A | C | A | C | Ib2 92/93 | A-form Ib2 | MODERATE |
-
-> ⚠️ Position 12 (T) is **always Ia-specific** — it's the "Ia anchor" that prevents HIGH-confidence Ib1/Ib2 calls.
 
 ---
 
